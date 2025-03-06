@@ -1,0 +1,23 @@
+name: Fetch Darts Events
+on:
+  schedule:
+    - cron: '0 * 6-7 3 *'
+  workflow_dispatch:
+jobs:
+  fetch-darts:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'schedule' && github.event.schedule == '0 * 6-7 3 *')
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+      - name: Install dependencies
+        run: pip install requests python-dotenv supabase
+      - name: Run script
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_KEY }}
+          API_KEY: ${{ secrets.API_KEY }}
+        run: python darts_to_supabase.py
