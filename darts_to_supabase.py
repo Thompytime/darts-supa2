@@ -68,7 +68,7 @@ def get_betmgm_premier_league_nights():
 if __name__ == "__main__":
     now = datetime.utcnow()
     start_utc = datetime(2025, 3, 6, 18, 0, 0)
-    stop_utc = datetime(2025, 3, 7, 18, 0, 0)
+    stop_utc = datetime(2025, 5, 30, 18, 0, 0)
     if start_utc <= now <= stop_utc:
         get_betmgm_premier_league_nights()
     else:
