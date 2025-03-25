@@ -1,4 +1,4 @@
-8name: Darts Schedule
+name: Darts Schedule
 
 on:
   schedule:
