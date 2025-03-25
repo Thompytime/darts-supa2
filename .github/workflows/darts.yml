@@ -1,52 +1,23 @@
-name: Darts Schedule
-
+name: Fetch Darts Events
 on:
   schedule:
-    # Weekly recurring schedules (March 6 to May 30, 2025)
-    - cron: '0 18 * * 3' # 18:00 UTC Wednesdays
-    - cron: '0 18 * * 4' # 18:00 UTC Thursdays
-    - cron: '0 0 * * 5'  # 00:00 UTC Fridays
-    - cron: '0 12 * * 5' # 12:00 UTC Fridays
-  workflow_dispatch: # Allows manual triggering for testing
-
+    - cron: '0 * 6-7 3 *'
+  workflow_dispatch:
 jobs:
-  run-darts-script:
+  fetch-darts:
     runs-on: ubuntu-latest
-
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'schedule' && github.event.schedule == '0 * 6-7 3 *')
     steps:
-      # Checkout the repository
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      # Set up Python
+      - uses: actions/checkout@v3
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
           python-version: '3.x'
-
-      # Install dependencies
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install requests supabase python-dotenv
-
-      # Run the script with environment variables
-      - name: Run darts script
+        run: pip install requests python-dotenv supabase
+      - name: Run script
         env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_KEY }}
           API_KEY: ${{ secrets.API_KEY }}
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: |
-          python darts_to_supabase.py
-
-      # One-off runs for May 30 and May 31, 2025
-      - name: Check and run one-off schedules
-        if: |
-          (github.event_name == 'schedule' && 
-           (github.event.schedule == '0 18 30 5 *' || github.event.schedule == '0 12 31 5 *'))
-        env:
-          API_KEY: ${{ secrets.API_KEY }}
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: |
-          python darts_to_supabase.py
+        run: python darts_to_supabase.py
